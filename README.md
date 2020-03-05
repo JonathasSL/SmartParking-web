@@ -1,6 +1,6 @@
-# Guardian - Web GUI
+# SmartParking - Web GUI
 ## :ledger: Notes before installing
-- :information_source: **This is just the project Web GUI**, you can get the API complement on [this repository](https://github.com/JonathasSL/guardian-api).
+- :information_source: **This is just the project Web GUI**, you can get the API complement on [this repository](https://github.com/JonathasSL/SmartParking-API).
 - By default, this project use [YARN](https://yarnpkg.com) as depedency/package management.
 ## :fire: Installation
 1. Install dependencies:
@@ -20,3 +20,6 @@ yarn install
 - [Bruno Marini](https://github.com/TheMarini)
 - [Jônathas Leandro](https://github.com/JonathasSL)
 - [Rafael Badaró](https://github.com/RafaelBadaro)
+- [Ravi Assis](https://github.com/raviassis)
+- [Humberto]
+- [Lucas Valadares]
