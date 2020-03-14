@@ -57,7 +57,7 @@
 // Axiosspot
 import axios from 'axios';
 // BUGFIX: same Vue CLI Service URL for CORS with Cue CLI proxy (look at "vue.config.js" file)
-axios.defaults.baseURL = 'http://localhost:4242';
+// // axios.defaults.baseURL = 'http://localhost:4242';
 
 export default {
 	name: 'SpotList',
