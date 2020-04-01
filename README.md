@@ -22,4 +22,4 @@ yarn install
 - [Rafael Badaró](https://github.com/RafaelBadaro)
 - [Ravi Assis](https://github.com/raviassis)
 - [Humberto]
-- [Lucas Valadares]
+- [Lucas Valadares](https://github.com/lucasmhv)
