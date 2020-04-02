@@ -63,7 +63,7 @@
       <main class="h-100 w-100 bg-dark">
 				<GmapMap
 					ref="mapRef"
-				  :center="{lat: -19.9296346, lng:-43.9375731}"
+				  :center="currentPosition"
 				  :zoom="15"
 				  map-type-id="roadmap"
 				  style="width: 100%; height: 100%"
@@ -126,10 +126,20 @@ export default {
 		PriceTable,
   },
 	created () {
-		this.getMap().then(map => {
-			this.markers = map.markers;
-			this.infos = map.infos;
+		this.markers.push({
+			position: this.currentPosition,
+			icon: 'https://www.robotwoods.com/dev/misc/bluecircle.png'
 		});
+		navigator.geolocation.watchPosition(
+			(pos) => { 
+				this.currentPosition.lat = pos.coords.latitude;
+				this.currentPosition.lng = pos.coords.longitude;
+				this.getMap(this.currentPosition).then(map => {
+					this.markers = this.markers.concat(map.markers);
+					this.infos = map.infos;
+				});
+			},
+		);
 	},
   data() {
     return {
@@ -142,6 +152,7 @@ export default {
 			user: null,
 			infos: [],
 			markers: [],
+			currentPosition: {lat: -19.9296346, lng:-43.9375731},
 			// markers: [{
 			// 	position: {
 			// 		lat: -19.9296346,
@@ -161,8 +172,9 @@ export default {
 
 		},
 
-		getMap () {
-			return axios.get('/api/parking')
+		getMap (position) {
+			const url = `/api/parking?latitude=${position.lat}&longitude=${position.lng}&radius=${500}`;
+			return axios.get(url)
 				.then(response => {
 					let parkings = response.data;
 					let markers = []
