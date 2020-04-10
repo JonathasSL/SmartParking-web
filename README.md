@@ -21,5 +21,5 @@ yarn install
 - [Jônathas Leandro](https://github.com/JonathasSL)
 - [Rafael Badaró](https://github.com/RafaelBadaro)
 - [Ravi Assis](https://github.com/raviassis)
-- [Humberto]
+- [Humberto](https://github.com/H1bertto)
 - [Lucas Valadares](https://github.com/lucasmhv)
