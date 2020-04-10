@@ -64,7 +64,8 @@
 				<GmapMap
 					ref="mapRef"
 				  :center="currentPosition"
-				  :zoom="15"
+				  :zoom="zoom"
+				  @zoom_changed="zoomChanged"
 				  map-type-id="roadmap"
 				  style="width: 100%; height: 100%"
 				>
@@ -76,14 +77,21 @@
 				    :draggable="true"
 				    @click="center=m.position"
 				  />
+				  <GmapCircle
+					:center="currentPosition"					
+					:visible="true"
+					:radius="circle_radius"
+					:options="{fillColor:'white',fillOpacity:1, strokeWeight:0.5}"					
+					></GmapCircle>
 				</GmapMap>
+				<!-- :radius="2"
+					:options="{fillColor:'white',fillOpacity:1, strokeWeight:0.5}" -->
 				<!-- <GmapInfoWindow
 					:key="index"
 					v-for="(i, index) in infos"
 					:position="i.position"
 					:content="i.content"
 				/> -->
-			</GmapMap>
       </main>
     </div>
     <Login @close="showLogin = false" @logged="logged" v-if="showLogin" class="login-container h-100 w-100"></Login>
@@ -126,24 +134,17 @@ export default {
 		PriceTable,
   },
 	created () {
-		this.markers.push({
-			position: this.currentPosition,
-			icon: 'https://www.robotwoods.com/dev/misc/bluecircle.png'
-		});
 		navigator.geolocation.watchPosition(
 			(pos) => { 
 				this.currentPosition.lat = pos.coords.latitude;
 				this.currentPosition.lng = pos.coords.longitude;
-				this.getMap(this.currentPosition).then(map => {
-					this.markers = this.markers.concat(map.markers);
-					this.infos = map.infos;
-				});
+				this.getMap(this.currentPosition);
 			},
 		);
 	},
   data() {
     return {
-      showLogin: false,
+      		showLogin: false,
 			showVehicleList: false,
 			showSpotList: false,
 			showGarage: false,
@@ -153,6 +154,9 @@ export default {
 			infos: [],
 			markers: [],
 			currentPosition: {lat: -19.9296346, lng:-43.9375731},
+			zoom: 15,
+			circle_radius: 27,
+			area_radius: 1270
 			// markers: [{
 			// 	position: {
 			// 		lat: -19.9296346,
@@ -164,7 +168,6 @@ export default {
   },
 	methods: {
 		logged(user) {
-			console.log("Usuário:", user);
 			this.user = user;
 		},
 
@@ -173,7 +176,7 @@ export default {
 		},
 
 		getMap (position) {
-			const url = `/api/parking?latitude=${position.lat}&longitude=${position.lng}&radius=${500}`;
+			const url = `/api/parking?latitude=${position.lat}&longitude=${position.lng}&radius=${this.area_radius}&format=json`;
 			return axios.get(url)
 				.then(response => {
 					let parkings = response.data;
@@ -205,6 +208,18 @@ export default {
 					console.log(e);
 				})
 		},
+
+		zoomChanged(event) {
+			console.log(event);
+			this.changeRadius(event);
+		},
+
+		changeRadius(zoom){
+			const max = 900000;
+			const area = max * 60;
+			this.circle_radius =  max / Math.pow(2.0, zoom);
+			this.area_radius = area / Math.pow(2.0, zoom);
+		}
 	}
 };
 </script>
