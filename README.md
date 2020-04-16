@@ -1,6 +1,6 @@
 # SmartParking - Web GUI
 ## :ledger: Notes before installing
-- :information_source: **This is just the project Web GUI**, you can get the API complement on [this repository](https://github.com/JonathasSL/SmartParking-API).
+- :information_source: **This is just the project Web GUI**, you can get the API complement on [this repository](https://github.com/H1bertto/SmartParkingAPI).
 - By default, this project use [YARN](https://yarnpkg.com) as depedency/package management.
 ## :fire: Installation
 1. Install dependencies:
