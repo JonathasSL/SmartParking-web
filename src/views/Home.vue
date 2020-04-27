@@ -176,7 +176,7 @@ export default {
 		},
 
 		getMap (position) {
-			const url = `/api/parking?latitude=${position.lat}&longitude=${position.lng}&radius=${this.area_radius}&format=json`;
+			const url = `parkings?latitude=${position.lat}&longitude=${position.lng}&radius=${this.area_radius}&format=json`;
 			return axios.get(url)
 				.then(response => {
 					let parkings = response.data;

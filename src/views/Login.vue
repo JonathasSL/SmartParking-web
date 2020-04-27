@@ -59,7 +59,7 @@
 					</div>
 					<div class="form-group col-md-6">
 						<label for="phone">Telefone</label>
-						<input v-model.number="formRegister.driver.phoneNumber" type="number" class="form-control" id="phone" placeholder="42987654321">
+						<input v-model.number="formRegister.driver.phone" type="number" class="form-control" id="phone" placeholder="42987654321">
 					</div>
 				</div>
 				<button type="submit" class="btn btn-info btn-block btn-lg">Cadastrar</button>
@@ -86,19 +86,23 @@
 					</div>
 					<div class="form-group col-md-6">
 						<label for="phone">Telefone</label>
-						<input v-model.number="formRegister.parking.phoneNumber" type="number" class="form-control" id="phone" placeholder="42987654321">
+						<input v-model.number="formRegister.parking.phone" type="number" class="form-control" id="phone" placeholder="42987654321">
 					</div>
 				</div>
+				<div class="form-group">
+					<label for="adress">Endereço</label>
+					<input v-model.text="formRegister.parking.address" type="text" class="form-control" placeholder="Av. Brasil, 2023 - Funcionários, Belo Horizonte">
+				</div>
 				<div class="form-row">
-				<div class="form-group col-md-6">
-					<label for="lat">Latitude</label>
-					<input v-model.number="formRegister.parking.latitude" type="text" class="form-control" id="lat" placeholder="12345678900">
+					<div class="form-group col-md-6">
+						<label for="lat">Latitude</label>
+						<input v-model.number="formRegister.parking.latitude" type="text" class="form-control" id="lat" placeholder="12345678900">
+					</div>
+					<div class="form-group col-md-6">
+						<label for="long">Longitude</label>
+						<input v-model.number="formRegister.parking.longitude" type="text" class="form-control" id="long" placeholder="42987654321">
+					</div>
 				</div>
-				<div class="form-group col-md-6">
-					<label for="long">Longitude</label>
-					<input v-model.number="formRegister.parking.longitude" type="text" class="form-control" id="long" placeholder="42987654321">
-				</div>
-			</div>
 				<button type="submit" class="btn btn-block btn-lg" :class="registerUserType ? 'btn-info' : 'btn-dark'">Cadastrar</button>
 			</form>
 		</div>
@@ -111,7 +115,9 @@
 <script>
 // TODO: verify if has a away to do this import as global
 // Axios
-import axios from 'axios';
+import openStreetService from '../services/openStreetService';
+import registerService from '../services/registerService';
+import constants from '../constants';
 // BUGFIX: same Vue CLI Service URL for CORS with Cue CLI proxy (look at "vue.config.js" file)
 // axios.defaults.baseURL = 'http://localhost:4242';
 
@@ -137,13 +143,12 @@ export default {
 		async login () {
 			let user;
 
-			// TODO: remove 404 console message
-			await axios.post('/api/driver/login', this.formLogin)
+			await axios.post('driver/login', this.formLogin)
 				.then(response => {
 					user = response.data;
 					user.type = "driver";
 				}).catch(async (e) => {
-					await axios.post('/api/parking/login', this.formLogin)
+					await axios.post('parking/login', this.formLogin)
 						.then(response => {
 							user = response.data;
 							user.type = "parking";
@@ -159,19 +164,32 @@ export default {
 			}
 		},
 
-		register () {
+		async register () {
+			let user;
 			if (this.registerUserType) {
-				axios.post('/api/driver', this.formRegister.driver)
+				await registerService.registerDriver(this.formRegister.driver)
 					.then(response => {
-						console.log(response);
+						user = response.data;
+						user.type = "driver";
+						alert(constants.MSGS.REGISTER_SUCCESSFULL);
 					})
-					.catch(console.log)
+					.catch(err => {alert(constants.MSGS.REGISTER_FAIL)});
 			} else {
-				axios.post('/api/parking', this.formRegister.parking)
+				const response =  await openStreetService.search(this.formRegister.parking.address);
+				this.formRegister.parking.latitude = response.data[0].lat;
+				this.formRegister.parking.longitude = response.data[0].lon;
+				await registerService.registerParking(this.formRegister.parking)
 					.then(response => {
-						console.log(response);
+						user = response.data;
+						user.type = "parking";
+						alert(constants.MSGS.REGISTER_SUCCESSFULL);
 					})
-					.catch(console.log)
+					.catch(err => {alert(constants.MSGS.REGISTER_FAIL)});
+			}
+			if (user) {
+				this.$emit('logged', user);
+				this.$emit('close');
+				this.$destroy();
 			}
 		},
 	}
