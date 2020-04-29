@@ -133,14 +133,20 @@ export default {
 		Garage,
 		PriceTable,
   },
-	created () {
+	async created () {
 		navigator.geolocation.watchPosition(
-			(pos) => { 
+			async (pos) => { 
 				this.currentPosition.lat = pos.coords.latitude;
 				this.currentPosition.lng = pos.coords.longitude;
-				this.getMap(this.currentPosition);
+				const result = await this.getMap(this.currentPosition);
+				this.infos = result.infos;
+				this.markers = result.markers;
 			},
 		);
+		const result = await this.getMap(this.currentPosition);
+		this.infos = result.infos;
+		this.markers = result.markers;
+		
 	},
   data() {
     return {
@@ -176,7 +182,9 @@ export default {
 		},
 
 		getMap (position) {
-			const url = `parkings?latitude=${position.lat}&longitude=${position.lng}&radius=${this.area_radius}&format=json`;
+			let url = `parkings?format=json`;
+			if (position && position.lat && position.lng)
+				url += `&latitude=${position.lat}&longitude=${position.lng}&radius=${this.area_radius}`;
 			return axios.get(url)
 				.then(response => {
 					let parkings = response.data;
@@ -185,12 +193,14 @@ export default {
 					for (let parking of parkings) {
 						if (parking.latitude && parking.longitude) {
 							markers.push({
+								id: parking.id,
 								position: {
 									lat: parking.latitude,
 									lng: parking.longitude,
 								}
 							});
 							infos.push({
+								id: parking.id,
 								position: {
 									lat: parking.latitude,
 									lng: parking.longitude,

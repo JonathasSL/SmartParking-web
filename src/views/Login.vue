@@ -113,13 +113,9 @@
 </template>
 
 <script>
-// TODO: verify if has a away to do this import as global
-// Axios
 import openStreetService from '../services/openStreetService';
 import registerService from '../services/registerService';
 import constants from '../constants';
-// BUGFIX: same Vue CLI Service URL for CORS with Cue CLI proxy (look at "vue.config.js" file)
-// axios.defaults.baseURL = 'http://localhost:4242';
 
 export default {
 	name: 'login',
