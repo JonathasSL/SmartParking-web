@@ -59,6 +59,7 @@
 					</div>
 					<span v-else class="px-2 pr-0">Entrar / Cadastrar</span>
 				</div>
+				
 			</nav>
       <main class="h-100 w-100 bg-dark">
 				<GmapMap
@@ -75,7 +76,7 @@
 				    :position="m.position"
 				    :clickable="true"
 				    :draggable="true"
-				    @click="center=m.position"
+				    @click="center=m.position; selectParking(m.id);"
 				  />
 				  <GmapCircle
 					:center="currentPosition"					
@@ -92,7 +93,11 @@
 					:position="i.position"
 					:content="i.content"
 				/> -->
-      </main>
+
+    		
+		</main>
+		<modal v-show="isModalVisible" @close="showModal" 
+			:parking="this.selectedParking" :user="this.user" />
     </div>
     <Login @close="showLogin = false" @logged="logged" v-if="showLogin" class="login-container h-100 w-100"></Login>
     <VehicleList @close="showVehicleList = false" v-if="showVehicleList" :userId="this.user.id" class="vehicle-list-container h-100 w-100"></VehicleList>
@@ -107,8 +112,8 @@
 import { UserIcon } from 'vue-feather-icons';
 
 import navbar from '@/components/Navbar.vue';
-
 import logo from '@/components/Logo.vue';
+import modal from '@/components/Modal.vue';
 
 import Login from '@/views/Login.vue';
 import VehicleList from '@/components/VehicleList.vue';
@@ -122,17 +127,18 @@ import axios from 'axios';
 // axios.defaults.baseURL = 'http://localhost:4242';
 
 export default {
-  name: 'home',
-  components: {
+	name: 'home',
+	components: {
 		navbar,
 		UserIcon,
 		logo,
-    Login,
+		modal,
+		Login,
 		VehicleList,
 		SpotList,
 		Garage,
 		PriceTable,
-  },
+	},
 	async created () {
 		navigator.geolocation.watchPosition(
 			async (pos) => { 
@@ -148,9 +154,9 @@ export default {
 		this.markers = result.markers;
 		
 	},
-  data() {
-    return {
-      		showLogin: false,
+	data() {
+		return {
+			showLogin: false,
 			showVehicleList: false,
 			showSpotList: false,
 			showGarage: false,
@@ -162,7 +168,9 @@ export default {
 			currentPosition: {lat: -19.9296346, lng:-43.9375731},
 			zoom: 15,
 			circle_radius: 27,
-			area_radius: 1270
+			area_radius: 1270,
+			isModalVisible: false,
+			selectedParking: null,
 			// markers: [{
 			// 	position: {
 			// 		lat: -19.9296346,
@@ -170,17 +178,23 @@ export default {
 			// 	}
 			// }]
 			// center: null,
-    }
-  },
+		}
+	},
 	methods: {
 		logged(user) {
 			this.user = user;
 		},
-
-		create() {
-
+		async selectParking(id) {
+			const url = `https://tisv-smartparking.herokuapp.com/parkings/${id}`;
+			const response = await this.$http.get(url);
+			this.selectedParking = response.data;
+			this.showModal();
 		},
-
+		showModal() {
+			this.isModalVisible = !this.isModalVisible;
+		},
+		create() {
+		},
 		getMap (position) {
 			let url = `parkings?format=json`;
 			if (position && position.lat && position.lng)
@@ -209,7 +223,6 @@ export default {
 							});
 						}
 					}
-
 					return {
 						markers: markers,
 						infos: infos,
@@ -218,12 +231,10 @@ export default {
 					console.log(e);
 				})
 		},
-
 		zoomChanged(event) {
 			console.log(event);
 			this.changeRadius(event);
 		},
-
 		changeRadius(zoom){
 			const max = 900000;
 			const area = max * 60;
