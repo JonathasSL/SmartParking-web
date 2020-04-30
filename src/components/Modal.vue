@@ -14,8 +14,8 @@
             <slot name="body">
               <p>
                 <strong>Endereço:</strong> {{ parking.full_address }}<br>
-                <strong>Vagas disponiveis:</strong> {{ parking.amount_parking_spots }}<br>
-                <strong>Vagas totais:</strong> {{ parking.available_parking_spots }}<br>
+                <strong>Vagas totais:</strong> {{ parking.amount_parking_spots }}<br>
+                <strong>Vagas disponiveis:</strong> {{ parking.available_parking_spots }}<br>
                 <strong>Preço por hora:</strong> R$ {{ parking.price_per_hour }}
               </p>
             </slot>
