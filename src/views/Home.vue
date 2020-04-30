@@ -76,6 +76,7 @@
 				    :position="m.position"
 				    :clickable="true"
 				    :draggable="true"
+					:icon="m.icon"
 				    @click="center=m.position; selectParking(m.id);"
 				  />
 				  <GmapCircle
@@ -152,7 +153,6 @@ export default {
 		const result = await this.getMap(this.currentPosition);
 		this.infos = result.infos;
 		this.markers = result.markers;
-		
 	},
 	data() {
 		return {
@@ -165,6 +165,11 @@ export default {
 			user: null,
 			infos: [],
 			markers: [],
+			markerColor: {
+				red: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+				green: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+				blue: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+			},
 			currentPosition: {lat: -19.9296346, lng:-43.9375731},
 			zoom: 15,
 			circle_radius: 27,
@@ -211,7 +216,8 @@ export default {
 								position: {
 									lat: parking.latitude,
 									lng: parking.longitude,
-								}
+								},
+								icon: { url: this.getMarkerColor(parking.available_parking_spots) },
 							});
 							infos.push({
 								id: parking.id,
@@ -234,6 +240,22 @@ export default {
 		zoomChanged(event) {
 			console.log(event);
 			this.changeRadius(event);
+		},
+		getMarkerColor(spots) {
+			console.log(spots);
+			switch (true) {
+				case spots <= 5:					
+					return this.markerColor.red;
+					break;
+				case spots >= 6 && spots <= 15:					
+					return this.markerColor.green;
+					break;
+				case spots >= 16:					
+					return this.markerColor.blue;
+					break;			
+				default: return this.markerColor.red;
+					break;
+			}
 		},
 		changeRadius(zoom){
 			const max = 900000;
