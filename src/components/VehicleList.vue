@@ -11,7 +11,7 @@
 				</div>
 				<div class="form-group col-md-6">
 					<label for="type">Tipo de Veículo</label>
-					<select v-model="vehicle.idVehicleType" required class="custom-select" id="type">
+					<select v-model="vehicle.type" required class="custom-select" id="type">
 						<option value="-1" selected disabled>Selecione um tipo</option>
 						<option value="0">Carro</option>
 						<option value="1">Moto</option>
@@ -19,13 +19,17 @@
 				</div>
 			</div>
 			<div class="form-row">
-				<div class="form-group col-md-6">
+				<div class="form-group col-md-4">
 					<label for="make">Fabricante</label>
-					<input v-model="vehicle.make" type="text" required class="form-control" id="make" placeholder="Tabajara">
+					<input v-model="vehicle.brand" type="text" required class="form-control" id="brand" placeholder="Tabajara">
 				</div>
-				<div class="form-group col-md-6">
-					<label for="model">Modelo</label>
-					<input v-model="vehicle.model" type="text" required class="form-control" id="model" placeholder="Monster 1.0 2016">
+				<div class="form-group col-md-4">
+					<label for="vehicle_model">Modelo</label>
+					<input v-model="vehicle.vehicle_model" type="text" required class="form-control" id="vehicle_model" placeholder="Monster 1.0 2016">
+				</div>
+				<div class="form-group col-md-4">
+					<label for="color">Cor</label>
+					<input v-model="vehicle.color" type="text" required class="form-control" id="color" placeholder="Azul">
 				</div>
 			</div>
 			<button type="submit" class="btn btn-info btn-block btn-lg">Cadastrar</button>
@@ -67,8 +71,8 @@ import axios from 'axios';
 export default {
 	name: 'login',
 	props: {
-		userId: {
-			type: Number,
+		user: {
+			type: Object,
 			required: true
 		}
 	},
@@ -77,11 +81,11 @@ export default {
 			vehicles: [],
 			ids: [],
 			vehicle: {
-				idDriver: this.userId,
-				plate: null,
-				idVehicleType: -1,
-				make: null,
-				model: null
+				plate: "",
+				type: "",
+				brand: "",
+				vehicle_model: "",
+				color: "",
 			},
 		 selectMode: 'multi',
 		 selected: []
@@ -110,7 +114,7 @@ export default {
 		},
 
 		refresh() {
-			axios.get('/api/vehicle')
+			axios.get('vehicles/')
 				.then(response => {
 					this.vehicles = response.data.filter(vehicle => {
 						return vehicle.idDriver == this.userId;
@@ -122,7 +126,8 @@ export default {
 		},
 
 		create() {
-			axios.post('/api/vehicle', this.vehicle)
+			this.vehicle.driver = this.user;
+			axios.post('vehicles/', this.vehicle)
 				.then(response => {
 					console.log(response);
 					this.refresh();

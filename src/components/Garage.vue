@@ -108,7 +108,7 @@ export default {
 		},
 
 		refresh() {
-			axios.get(`/api/parking/${this.userId}/vehicles`)
+			axios.get(`parking-spots/?parking=${parking.id}`)
 				.then(response => {
 					// this.spots = response.data.filter(spot => {
 					// 	return spot.idParking == this.userId;
@@ -123,12 +123,12 @@ export default {
 
 			this.refresh();
 
-			axios.post('/api/parking_spot', this.spot)
+			axios.post('parking_spots/', this.spot)
 				.then(response => {
 					console.log(response);
 					this.spot = {
 						idParking: this.userId,
-						idVehicleType: null,
+						vehicle_type: null,
 						idStatus: null,
 						ammount: null
 					};
@@ -149,7 +149,7 @@ export default {
 			}
 
 			for (let trash of trashList) {
-				axios.delete(`/api/parking_spot/${trash.id}`)
+				axios.delete(`parking_spot/${trash.id}/`)
 					.then(response => {
 						console.log("Delete:", response);
 						this.refresh();
@@ -189,7 +189,7 @@ export default {
 	},
 	created() {
 		// Status list
-		axios.get('/api/status')
+		axios.get('status/')
 			.then(response => {
 				this.statusList = response.data;
 			})

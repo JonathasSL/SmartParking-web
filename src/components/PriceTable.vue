@@ -104,9 +104,10 @@ export default {
 		},
 
 		refresh() {
-			axios.get(`/api/price/${this.userId}`)
+			axios.get(`/parkings/${this.userId}`)
 				.then(response => {
-					this.prices = response.data;
+					console.log(response.data)
+					this.prices = response.data.price_per_hour;
 					console.log("Preços:", this.prices);
 				})
 				.catch(console.log)
@@ -184,7 +185,7 @@ export default {
 	},
 	created() {
 		// Status list
-		axios.get('/api/status')
+		axios.get('status/')
 			.then(response => {
 				this.statusList = response.data;
 			})
