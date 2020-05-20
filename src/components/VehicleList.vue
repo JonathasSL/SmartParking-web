@@ -74,18 +74,26 @@ export default {
 		user: {
 			type: Object,
 			required: true
-		}
+    },
+    token: {
+      type: String,
+      required: true
+    }
 	},
 	data() {
 		return {
 			vehicles: [],
-			ids: [],
 			vehicle: {
 				plate: "",
 				type: "",
 				brand: "",
 				vehicle_model: "",
-				color: "",
+        color: "",
+        driver: {
+          id: null,
+          user: null,
+          cpf: "",
+        },
 			},
 		 selectMode: 'multi',
 		 selected: []
@@ -97,14 +105,11 @@ export default {
 			for (let vehicle of this.vehicles) {
 				table.push({
 					Placa: vehicle.plate,
-					'Tipo de Veículo': vehicle.id_vehicle_type === 0 ? 'Carro' : 'Moto',
-					Fabricante: vehicle.make,
-					Modelo: vehicle.model,
+					'Tipo de Veículo': vehicle.type,
+					Fabricante: vehicle.brand,
+					Modelo: vehicle.vehicle_model,
 				});
-				this.ids.push(vehicle.id)
 			}
-
-			console.log(table)
 			return table;
 		}
 	},
@@ -112,40 +117,40 @@ export default {
 		close() {
 			this.$emit('close');
 		},
-
 		refresh() {
-			axios.get('vehicles/')
+			axios.get('vehicles/', {
+          headers: { 'Authorization': 'Token '+ this.token }
+        })
 				.then(response => {
-					this.vehicles = response.data.filter(vehicle => {
-						return vehicle.idDriver == this.userId;
-					});;
-
-					console.log(response)
+					this.vehicles = response.data;
 				})
 				.catch(console.log)
 		},
-
 		create() {
-			this.vehicle.driver = this.user;
-			axios.post('vehicles/', this.vehicle)
+      this.vehicle.driver = this.user;
+			axios.post('vehicles/', this.vehicle, {
+          headers: { 'Authorization': 'Token '+ this.token }
+        })
 				.then(response => {
-					console.log(response);
 					this.refresh();
 					this.vehicle = {
 						plate: null,
-						vehicle_type: -1,
-						make: null,
-						model: null
+						type: -1,
+						brand: null,
+            vehicle_model: null,
+            color: null,
+            driver: {
+              id: this.user.id,
+              userId: this.user.user,
+              cpf: this.user.cpf,
+            }
 					}
 				})
 				.catch(console.log)
 		},
-
 		trash() {
 			let trashList = [];
-
 			console.log("Selecteds:", this.selected)
-
 			for (let selected of this.selected) {
 				trashList.push(this.vehicles.find(vehicle => {
 					console.log("vehicle", vehicle);
@@ -153,7 +158,6 @@ export default {
 					return vehicle.plate == selected.placa;
 				}))
 			}
-
 			// for (let id of this.ids) {
 			// 	this.vehicles.find(vehicle => {
 			// 		console.log("ID", id);
@@ -161,9 +165,7 @@ export default {
 			// 		return vehicle.id = id;
 			// 	})
 			// }
-
 			console.log("Lista de Lixo:", trashList);
-
 			// axios.delete('/api/vehicle', this.vehicle)
 			// 	.then(response => {
 			// 		console.log(response);
@@ -177,7 +179,6 @@ export default {
 			// 	})
 			// 	.catch(console.log)
 		},
-
 		onRowSelected(items) {
       this.selected = items
     },

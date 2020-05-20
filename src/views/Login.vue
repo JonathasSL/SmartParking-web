@@ -197,14 +197,13 @@ export default {
 		},		
 		async login () {
 			let user;
-			let token;
 			if (this.loginType == true) {
 				await axios.post('login/driver/', this.formLogin)
 					.then(response => {
-						token = response.data.token;					
+						this.token = response.data.token;					
 					}).then(async () => {
 						await axios.get('drivers/', {
-							headers: { 'Authorization': 'Token '+ token  }
+							headers: { 'Authorization': 'Token '+ this.token  }
 						}).then(response => {
 							user = response.data[0];
 							user.type = "driver";
@@ -215,10 +214,10 @@ export default {
 			} else {
 				await axios.post('login/parking/', this.formLogin)
 				.then(response => {
-					token = response.data;
+					this.token = response.data.token;
 				}).then(async () => {
 						await axios.get('parkings/', {
-							headers: { 'Authorization': 'Token '+ token }
+							headers: { 'Authorization': 'Token '+ this.token }
 						}).then(response => {
 							user = response.data[0];
 							user.type = "parking";
@@ -228,7 +227,7 @@ export default {
 					})
 			}
 			if (user) {
-				this.$emit('logged', user, token);
+				this.$emit('logged', user, this.token);
 				this.$emit('close');
 				this.$destroy();
 			}

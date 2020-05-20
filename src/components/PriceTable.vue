@@ -62,10 +62,14 @@ import axios from 'axios';
 export default {
 	name: 'SpotList',
 	props: {
-		userId: {
-			type: Number,
+		user: {
+			type: Object,
 			required: true
-		}
+    },
+    token: {
+      type: String,
+      required: true
+    }
 	},
 	data() {
 		return {
