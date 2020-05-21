@@ -1,43 +1,40 @@
 <template lang="html">
 	<div class="spot-list h-100 w-100 d-flex flex-column justify-content-center align-items-center">
-		<h1 class="text-black mb-4"><b>Lista de Vagas</b></h1>
+		<h1 class="text-black mb-4"><b>Meu estacionamento</b></h1>
 		<h1 class="exit mb-0 mt-3 mr-4" @click="close">
 			X
 		</h1>
-		<form class="form-create w-50" @submit.prevent="create">
-			<div class="form-row">
-				<div class="form-group col-md-2">
-					<label for="plate">Quantidade</label>
-					<input v-model="spot.ammount" type="number" required class="form-control" id="ammount" placeholder="-" min="1">
+    <div class="garage-info">
+      <p>Total de vagas: {{ parking.amount_parking_spots }}</p>    
+      <p>Vagas disponíveis: {{ parking.available_parking_spots }}</p>
+      <p>Preço por hora: {{ parking.price_per_hour }}</p>
+    </div>
+    <hr>
+		<form class="form-create w-50" @submit.prevent="update">
+      <h3>Atualizar informações</h3>
+			<div class="form-row add-spots">      
+				<div class="form-group col-md-6">          
+					<label for="amount">Quantidade total</label>          
+					<input v-model="parking.amount_parking_spots" type="number" required class="form-control" id="amount" min="1">
 				</div>
-				<div class="form-group col-md-5">
-					<label for="type">Tipo de Vaga</label>
-					<select v-model="spot.idVehicleType" required class="custom-select" id="type">
-						<option value="-1" selected disabled>Selecione um tipo</option>
-						<option value="0">Carro</option>
-						<option value="1">Moto</option>
-					</select>
-				</div>
-				<div class="form-group col-md-5">
-					<label for="type">Status</label>
-					<select v-model="spot.idStatus" required class="custom-select" id="type">
-						<option value="-1" disabled>Selecione um status</option>
-						<option v-for="(status, index) in statusList" :key="status.id" :value="status.id" :selected="status.name == 'Disponivel'">{{status.name}}</option>
-					</select>
-				</div>
-			</div>
-			<button type="submit" class="btn btn-info btn-block btn-lg">Cadastrar</button>
+        <div class="form-group col-md-6">          
+					<label for="price">Preço por hora</label>          
+					<input v-model="parking.price_per_hour" type="number" class="form-control" id="price" min="1">
+				</div>       	             
+			</div>	
+      <button type="submit" class="btn btn-info btn-block btn-lg">Atualizar</button>
 		</form>
-
-		<b-table
+    <div>
+    <b-table
       ref="selectableTable"
       selectable
+      sticky-header
       :select-mode="selectMode"
       selected-variant="success"
       :items="spotsTable"
       @row-selected="onRowSelected"
       responsive="sm"
-			class="mt-4 w-50"
+			class="table-size"
     >
       <template v-slot:cell(selected)="{ rowSelected }">
         <template v-if="rowSelected">
@@ -49,9 +46,9 @@
           <span class="sr-only">Not selected</span>
         </template>
       </template>
-    </b-table>
-		<button :disabled="!selected.length > 0" @click="trash" type="button" name="button" class="btn btn-danger _rounded">Deletar</button>
-	</div>
+      </b-table>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -64,78 +61,83 @@ import axios from 'axios';
 export default {
 	name: 'SpotList',
 	props: {
-		userId: {
-			type: Number,
+		user: {
+			type: Object,
 			required: true
-		}
+    },
+    token: {
+      type: String,
+      required: true
+    }
 	},
 	data() {
 		return {
 			spots: [],
-			ids: [],
-			statusList: [],
+      statusList: [],
+      driverList: [],
 			spot: {
-				idParking: this.userId,
-				idVehicleType: null,
-				idStatus: null,
-				ammount: null
-			},
-		 selectMode: 'multi',
-		 selected: []
+        id: null,
+        parking: null,
+        status: null,
+        driver: null,
+      },
+      parking: {
+        amount_parking_spots: null,
+        available_parking_spots: null,
+        price_per_hour: null,
+      },
+      selectMode: 'multi',
+      selected: [],
 		}
 	},
-	computed: {
+	computed: {    
 		spotsTable() {
-			let table = [];
+      let table = [];
 			for (let spot of this.spots) {
 				table.push({
-					ID: spot.id,
-					Nome: spot.name,
-					'Tipo de Veículo': spot.idVehicleType === 0 ? 'Carro' : 'Moto',
-					Status: this.statusList.find(status => status.id == spot.idStatus).name
+					Status: spot.status_title,
+					Ocupante:  spot.driver_name ? spot.driver_name : "---",
 				});
-				this.ids.push(spot.id)
 			}
-
-			console.log(table)
 			return table;
-		}
+    },
+  },
+  mounted() {
+    this.parking.amount_parking_spots = this.user.amount_parking_spots;
+    this.parking.available_parking_spots = this.user.available_parking_spots;
+    this.parking.price_per_hour = this.user.price_per_hour;
+  },
+  created() {
+		this.refresh();
 	},
 	methods: {
 		close() {
 			this.$emit('close');
 		},
-
-		refresh() {
-			axios.get('/api/parking_spot')
+		async refresh() {
+			await axios.get('parking-spots/', {
+        headers: { 'Authorization': 'Token '+ this.token }
+      })
+      .then(response => {
+        this.spots = response.data;
+      }).catch(console.log)
+    },
+		update() {
+      let updated_user;
+			axios.patch(`parkings/${this.user.id}/`, this.parking, {
+          headers: { 'Authorization': 'Token '+ this.token }
+        })
 				.then(response => {
-					this.spots = response.data.filter(spot => {
-						return spot.idParking == this.userId;
-					});
-					console.log("Spots:", this.spots)
+          this.parking.price_per_hour = response.data.price_per_hour;
+          this.parking.amount_parking_spots = response.data.amount_parking_spots;
+          this.parking.available_parking_spots = response.data.available_parking_spots;
+          updated_user = response.data;					
 				})
-				.catch(console.log)
-		},
-
-		create() {
-			console.log(this.spot)
-
-			this.refresh();
-
-			axios.post('/api/parking_spot', this.spot)
-				.then(response => {
-					console.log(response);
-					this.spot = {
-						idParking: this.userId,
-						idVehicleType: null,
-						idStatus: null,
-						ammount: null
-					};
-					this.refresh();
-				})
-				.catch(console.log)
-		},
-
+        .catch(console.log);     
+      this.$emit('updated', updated_user);
+      this.refresh();
+    },
+    
 		trash() {
 			let trashList = [];
 
@@ -148,12 +150,14 @@ export default {
 			}
 
 			for (let trash of trashList) {
-				axios.delete(`/api/parking_spot/${trash.id}`)
-					.then(response => {
-						console.log("Delete:", response);
-						this.refresh();
-					})
-					.catch(console.log)
+				axios.delete(`parking-spots/${trash.id}`,  {
+          headers: { 'Authorization': 'Token '+ token }
+        })
+        .then(response => {
+          console.log("Delete:", response);
+          this.refresh();
+        })
+        .catch(console.log)
 			}
 
 
@@ -185,23 +189,28 @@ export default {
 		onRowSelected(items) {
       this.selected = items
     },
-	},
-	created() {
-		// Status list
-		axios.get('/api/status')
-			.then(response => {
-				this.statusList = response.data;
-			})
-			.catch(console.log)
-
-		this.refresh();
-	}
+	},	
 }
 </script>
 
 <style lang="css" scoped>
 .spot-list {
 	background-color: #fff;
+}
+
+.add-spots {
+  align-items: baseline;
+}
+
+.garage-info {
+  width: 50%;
+}
+
+.table-size {
+  margin-top: 4px;
+  width: 32em;
+  height: 12em;
+  overflow-y: auto;
 }
 
 .exit {

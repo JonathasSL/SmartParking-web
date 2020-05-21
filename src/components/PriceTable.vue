@@ -62,10 +62,14 @@ import axios from 'axios';
 export default {
 	name: 'SpotList',
 	props: {
-		userId: {
-			type: Number,
+		user: {
+			type: Object,
 			required: true
-		}
+    },
+    token: {
+      type: String,
+      required: true
+    }
 	},
 	data() {
 		return {
@@ -104,9 +108,10 @@ export default {
 		},
 
 		refresh() {
-			axios.get(`/api/price/${this.userId}`)
+			axios.get(`/parkings/${this.userId}`)
 				.then(response => {
-					this.prices = response.data;
+					console.log(response.data)
+					this.prices = response.data.price_per_hour;
 					console.log("Preços:", this.prices);
 				})
 				.catch(console.log)
@@ -184,7 +189,7 @@ export default {
 	},
 	created() {
 		// Status list
-		axios.get('/api/status')
+		axios.get('status/')
 			.then(response => {
 				this.statusList = response.data;
 			})

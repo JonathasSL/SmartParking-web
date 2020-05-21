@@ -3,6 +3,7 @@
 		<h1 class="exit mb-0 mt-3 mr-4" @click="close">
 			X
 		</h1>
+    <h1>Meus veículos</h1>
 		<form class="form-create" @submit.prevent="create">
 			<div class="form-row">
 				<div class="form-group col-md-6">
@@ -11,7 +12,7 @@
 				</div>
 				<div class="form-group col-md-6">
 					<label for="type">Tipo de Veículo</label>
-					<select v-model="vehicle.idVehicleType" required class="custom-select" id="type">
+					<select v-model="vehicle.type" required class="custom-select" id="type">
 						<option value="-1" selected disabled>Selecione um tipo</option>
 						<option value="0">Carro</option>
 						<option value="1">Moto</option>
@@ -19,13 +20,17 @@
 				</div>
 			</div>
 			<div class="form-row">
-				<div class="form-group col-md-6">
+				<div class="form-group col-md-4">
 					<label for="make">Fabricante</label>
-					<input v-model="vehicle.make" type="text" required class="form-control" id="make" placeholder="Tabajara">
+					<input v-model="vehicle.brand" type="text" required class="form-control" id="brand" placeholder="Tabajara">
 				</div>
-				<div class="form-group col-md-6">
-					<label for="model">Modelo</label>
-					<input v-model="vehicle.model" type="text" required class="form-control" id="model" placeholder="Monster 1.0 2016">
+				<div class="form-group col-md-4">
+					<label for="vehicle_model">Modelo</label>
+					<input v-model="vehicle.vehicle_model" type="text" required class="form-control" id="vehicle_model" placeholder="Monster 1.0 2016">
+				</div>
+				<div class="form-group col-md-4">
+					<label for="color">Cor</label>
+					<input v-model="vehicle.color" type="text" required class="form-control" id="color" placeholder="Azul">
 				</div>
 			</div>
 			<button type="submit" class="btn btn-info btn-block btn-lg">Cadastrar</button>
@@ -53,7 +58,7 @@
         </template>
       </template>
     </b-table>
-		<button :disabled="!selected.length > 0" @click="trash" type="button" name="button" class="btn btn-danger _rounded">Deletar</button>
+		<!-- <button :disabled="!selected.length > 0" @click="trash" type="button" name="button" class="btn btn-danger _rounded">Deletar</button> -->
 	</div>
 </template>
 
@@ -67,21 +72,27 @@ import axios from 'axios';
 export default {
 	name: 'login',
 	props: {
-		userId: {
-			type: Number,
+		user: {
+			type: Object,
 			required: true
-		}
+    },
+    token: {
+      type: String,
+      required: true
+    }
 	},
 	data() {
 		return {
 			vehicles: [],
-			ids: [],
 			vehicle: {
-				idDriver: this.userId,
-				plate: null,
-				idVehicleType: -1,
-				make: null,
-				model: null
+				plate: "",
+				type: "",
+				brand: "",
+				vehicle_model: "",
+        color: "",
+        driver: {
+          id: null,
+        },
 			},
 		 selectMode: 'multi',
 		 selected: []
@@ -93,14 +104,11 @@ export default {
 			for (let vehicle of this.vehicles) {
 				table.push({
 					Placa: vehicle.plate,
-					'Tipo de Veículo': vehicle.id_vehicle_type === 0 ? 'Carro' : 'Moto',
-					Fabricante: vehicle.make,
-					Modelo: vehicle.model,
+					'Tipo de Veículo': vehicle.type,
+					Fabricante: vehicle.brand,
+					Modelo: vehicle.vehicle_model,
 				});
-				this.ids.push(vehicle.id)
 			}
-
-			console.log(table)
 			return table;
 		}
 	},
@@ -108,71 +116,68 @@ export default {
 		close() {
 			this.$emit('close');
 		},
-
 		refresh() {
-			axios.get('/api/vehicle')
+			axios.get('vehicles/', {
+          headers: { 'Authorization': 'Token '+ this.token }
+        })
 				.then(response => {
-					this.vehicles = response.data.filter(vehicle => {
-						return vehicle.idDriver == this.userId;
-					});;
-
-					console.log(response)
+					this.vehicles = response.data;
 				})
 				.catch(console.log)
 		},
-
 		create() {
-			axios.post('/api/vehicle', this.vehicle)
+      this.vehicle.driver = this.user.id;
+			axios.post('vehicles/', this.vehicle, {
+          headers: { 'Authorization': 'Token '+ this.token }
+        })
 				.then(response => {
-					console.log(response);
 					this.refresh();
 					this.vehicle = {
 						plate: null,
-						vehicle_type: -1,
-						make: null,
-						model: null
+						type: -1,
+						brand: null,
+            vehicle_model: null,
+            color: null,
+            driver: {
+              id: this.user.id,
+              userId: this.user.user,
+              cpf: this.user.cpf,
+            }
 					}
 				})
 				.catch(console.log)
 		},
-
-		trash() {
-			let trashList = [];
-
-			console.log("Selecteds:", this.selected)
-
-			for (let selected of this.selected) {
-				trashList.push(this.vehicles.find(vehicle => {
-					console.log("vehicle", vehicle);
-					console.log("selected", selected);
-					return vehicle.plate == selected.placa;
-				}))
-			}
-
-			// for (let id of this.ids) {
-			// 	this.vehicles.find(vehicle => {
-			// 		console.log("ID", id);
-			// 		console.log("Vehicle", vehicle);
-			// 		return vehicle.id = id;
-			// 	})
-			// }
-
-			console.log("Lista de Lixo:", trashList);
-
-			// axios.delete('/api/vehicle', this.vehicle)
-			// 	.then(response => {
-			// 		console.log(response);
-			// 		this.refresh();
-			// 		this.vehicle = {
-			// 			plate: null,
-			// 			vehicle_type: -1,
-			// 			make: null,
-			// 			model: null
-			// 		}
-			// 	})
-			// 	.catch(console.log)
-		},
-
+		// trash() {
+		// 	let trashList = [];
+		// 	console.log("Selecteds:", this.selected)
+		// 	for (let selected of this.selected) {
+		// 		trashList.push(this.vehicles.find(vehicle => {
+		// 			console.log("vehicle", vehicle);
+		// 			console.log("selected", selected);
+		// 			return vehicle.plate == selected.placa;
+		// 		}))
+		// 	}
+		// 	for (let id of this.ids) {
+		// 		this.vehicles.find(vehicle => {
+		// 			console.log("ID", id);
+		// 			console.log("Vehicle", vehicle);
+		// 			return vehicle.id = id;
+		// 		})
+		// 	}
+		// 	console.log("Lista de Lixo:", trashList);
+		// 	axios.delete('/api/vehicle', this.vehicle)
+		// 		.then(response => {
+		// 			console.log(response);
+		// 			this.refresh();
+		// 			this.vehicle = {
+		// 				plate: null,
+		// 				vehicle_type: -1,
+		// 				make: null,
+		// 				model: null
+		// 			}
+		// 		})
+		// 		.catch(console.log)
+		// },
 		onRowSelected(items) {
       this.selected = items
     },

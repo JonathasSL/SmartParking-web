@@ -27,10 +27,10 @@
 							<a class="nav-link" href="#">
 								<!-- <img src="@/assets/icon/rectangles.svg" alt=""> -->
 								<!-- <users-icon size="1.5x" class="custom-class"></users-icon> -->
-								<span class="ml-2">Minhas vagas</span>
+								<span class="ml-2">Meu estacionamento</span>
 							</a>
 			      </li>
-						<li v-if="user && user.type != 'driver'" @click="showGarage = true" class="nav-item">
+						<!-- <li v-if="user && user.type != 'driver'" @click="showGarage = true" class="nav-item">
 							<a class="nav-link" href="#">
 								<span class="ml-2">Garagem</span>
 							</a>
@@ -39,7 +39,7 @@
 							<a class="nav-link" href="#">
 								<span class="ml-2">Tabela de Preços</span>
 							</a>
-						</li>
+						</li> -->
 			    </ul>
 			  </div>
 
@@ -64,7 +64,7 @@
       <main class="h-100 w-100 bg-dark">
 				<GmapMap
 					ref="mapRef"
-				  :center="currentPosition"
+				  :center="this.currentPosition"
 				  :zoom="zoom"
 				  @zoom_changed="zoomChanged"
 				  map-type-id="roadmap"
@@ -80,7 +80,7 @@
 				    @click="center=m.position; selectParking(m.id);"
 				  />
 				  <GmapCircle
-					:center="currentPosition"					
+					:center="this.currentPosition"					
 					:visible="true"
 					:radius="circle_radius"
 					:options="{fillColor:'white',fillOpacity:1, strokeWeight:0.5}"					
@@ -101,21 +101,19 @@
 			:parking="this.selectedParking" :user="this.user" />
     </div>
     <Login @close="showLogin = false" @logged="logged" v-if="showLogin" class="login-container h-100 w-100"></Login>
-    <VehicleList @close="showVehicleList = false" v-if="showVehicleList" :userId="this.user.id" class="vehicle-list-container h-100 w-100"></VehicleList>
-    <SpotList @close="showSpotList = false" v-if="showSpotList" :userId="this.user.id" class="vehicle-list-container h-100 w-100"></SpotList>
-    <Garage @close="showGarage = false" v-if="showGarage" :userId="this.user.id" class="vehicle-list-container h-100 w-100"></Garage>
-		<PriceTable @close="showPriceTable = false" v-if="showPriceTable" :userId="this.user.id" class="vehicle-list-container h-100 w-100"></PriceTable>
+    <VehicleList @close="showVehicleList = false" v-if="showVehicleList" :token="this.token" :user="this.user" class="vehicle-list-container h-100 w-100"></VehicleList>
+    <SpotList @close="showSpotList = false" v-if="showSpotList" :token="this.token" :user="this.user" class="vehicle-list-container h-100 w-100"></SpotList>
+    <Garage @close="showGarage = false" v-if="showGarage" :token="this.token" :user="this.user" class="vehicle-list-container h-100 w-100"></Garage>
+	<PriceTable @close="showPriceTable = false" v-if="showPriceTable" :token="this.token" :user="this.user" class="vehicle-list-container h-100 w-100"></PriceTable>
 	</div>
 </template>
 
 <script>
 // @ is an alias to /src
 import { UserIcon } from 'vue-feather-icons';
-
 import navbar from '@/components/Navbar.vue';
 import logo from '@/components/Logo.vue';
 import modal from '@/components/Modal.vue';
-
 import Login from '@/views/Login.vue';
 import VehicleList from '@/components/VehicleList.vue';
 import SpotList from '@/components/SpotList.vue';
@@ -139,21 +137,7 @@ export default {
 		SpotList,
 		Garage,
 		PriceTable,
-	},
-	async created () {
-		navigator.geolocation.watchPosition(
-			async (pos) => { 
-				this.currentPosition.lat = pos.coords.latitude;
-				this.currentPosition.lng = pos.coords.longitude;
-				const result = await this.getMap(this.currentPosition);
-				this.infos = result.infos;
-				this.markers = result.markers;
-			},
-		);
-		const result = await this.getMap(this.currentPosition);
-		this.infos = result.infos;
-		this.markers = result.markers;
-	},
+	},	
 	data() {
 		return {
 			showLogin: false,
@@ -163,53 +147,78 @@ export default {
 			showPriceTable: false,
 			showCars: false,
 			user: null,
+			token: "",
 			infos: [],
 			markers: [],
+			parkings: [],
 			markerColor: {
 				red: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
 				green: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
 				blue: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
 			},
-			currentPosition: {lat: -19.9296346, lng:-43.9375731},
+			currentPosition: {
+				lat: null, 
+				lng: null,
+			},
 			zoom: 15,
 			circle_radius: 27,
 			area_radius: 1270,
 			isModalVisible: false,
-			selectedParking: null,
-			// markers: [{
-			// 	position: {
-			// 		lat: -19.9296346,
-			// 		lng: -43.9375731,
-			// 	}
-			// }]
-			// center: null,
+      selectedParking: null,
+      isPublic: true,
 		}
 	},
+	mounted () {
+		this.getLocation();
+	},
 	methods: {
-		logged(user) {
+    updated(updated_user) {
+      this.user = updated_user;
+    },
+		async logged(user, token) {
 			this.user = user;
+			this.token = token;
+			navigator.geolocation.getCurrentPosition((pos) => {
+				this.currentPosition.lat = pos.coords.latitude;
+				this.currentPosition.lng = pos.coords.longitude;
+      })
+      if (user.cnpj) {
+        this.isPublic = false;
+      }      
+			const result = await this.getMap(this.currentPosition);
+			this.infos = result.infos;
+			this.markers = result.markers;
 		},
 		async selectParking(id) {
-			const url = `https://tisv-smartparking.herokuapp.com/parkings/${id}`;
-			const response = await this.$http.get(url);
-			this.selectedParking = response.data;
+			const response = await this.$http.get(`parkings/?public=${id}`);
+			this.selectedParking = response.data[0];
 			this.showModal();
 		},
 		showModal() {
 			this.isModalVisible = !this.isModalVisible;
 		},
-		create() {
+		async getLocation() {
+				navigator.geolocation.getCurrentPosition(async (pos) => {
+				this.currentPosition.lat = pos.coords.latitude;
+				this.currentPosition.lng = pos.coords.longitude;
+				const result = await this.getMap(this.currentPosition);
+				this.infos = result.infos;
+				this.markers = result.markers;
+			},);
 		},
 		getMap (position) {
-			let url = `parkings?format=json`;
-			if (position && position.lat && position.lng)
-				url += `&latitude=${position.lat}&longitude=${position.lng}&radius=${this.area_radius}`;
+			let url = `parkings/?`;
+			if (position && position.lat && position.lng && this.isPublic) {
+        url += `point=${position.lat},${position.lng}&public=true`;
+      } else if (position && position.lat && position.lng) {
+        url += `point=${position.lat},${position.lng}`;
+      }
 			return axios.get(url)
 				.then(response => {
-					let parkings = response.data;
+					this.parkings = response.data;
 					let markers = []
 					let infos = []
-					for (let parking of parkings) {
+					for (let parking of this.parkings) {
 						if (parking.latitude && parking.longitude) {
 							markers.push({
 								id: parking.id,
@@ -225,7 +234,6 @@ export default {
 									lat: parking.latitude,
 									lng: parking.longitude,
 								},
-								content: "OLA MUNDO"
 							});
 						}
 					}
@@ -238,7 +246,6 @@ export default {
 				})
 		},
 		zoomChanged(event) {
-			console.log(event);
 			this.changeRadius(event);
 		},
 		getMarkerColor(spots) {
