@@ -27,10 +27,10 @@
 							<a class="nav-link" href="#">
 								<!-- <img src="@/assets/icon/rectangles.svg" alt=""> -->
 								<!-- <users-icon size="1.5x" class="custom-class"></users-icon> -->
-								<span class="ml-2">Minhas vagas</span>
+								<span class="ml-2">Meu estacionamento</span>
 							</a>
 			      </li>
-						<li v-if="user && user.type != 'driver'" @click="showGarage = true" class="nav-item">
+						<!-- <li v-if="user && user.type != 'driver'" @click="showGarage = true" class="nav-item">
 							<a class="nav-link" href="#">
 								<span class="ml-2">Garagem</span>
 							</a>
@@ -39,7 +39,7 @@
 							<a class="nav-link" href="#">
 								<span class="ml-2">Tabela de Preços</span>
 							</a>
-						</li>
+						</li> -->
 			    </ul>
 			  </div>
 
@@ -164,27 +164,34 @@ export default {
 			circle_radius: 27,
 			area_radius: 1270,
 			isModalVisible: false,
-			selectedParking: null,
+      selectedParking: null,
+      isPublic: true,
 		}
 	},
 	mounted () {
 		this.getLocation();
 	},
 	methods: {
+    updated(updated_user) {
+      this.user = updated_user;
+    },
 		async logged(user, token) {
 			this.user = user;
 			this.token = token;
 			navigator.geolocation.getCurrentPosition((pos) => {
 				this.currentPosition.lat = pos.coords.latitude;
 				this.currentPosition.lng = pos.coords.longitude;
-			})	
+      })
+      if (user.cnpj) {
+        this.isPublic = false;
+      }      
 			const result = await this.getMap(this.currentPosition);
 			this.infos = result.infos;
 			this.markers = result.markers;
 		},
 		async selectParking(id) {
-			const response = await this.$http.get(`parkings/${id}/`);
-			this.selectedParking = response.data;
+			const response = await this.$http.get(`parkings/?public=${id}`);
+			this.selectedParking = response.data[0];
 			this.showModal();
 		},
 		showModal() {
@@ -201,8 +208,11 @@ export default {
 		},
 		getMap (position) {
 			let url = `parkings/?`;
-			if (position && position.lat && position.lng)
-				url += `point=${position.lat},${position.lng}`;
+			if (position && position.lat && position.lng && this.isPublic) {
+        url += `point=${position.lat},${position.lng}&public=true`;
+      } else if (position && position.lat && position.lng) {
+        url += `point=${position.lat},${position.lng}`;
+      }
 			return axios.get(url)
 				.then(response => {
 					this.parkings = response.data;

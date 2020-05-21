@@ -28,7 +28,6 @@ Vue.use(VueGoogleMaps, {
 		language: 'pt-BR',
 	}
 });
-
 Vue.use(VueAxios, axios);
 
 // --- CONFIGS ---

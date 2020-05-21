@@ -6,18 +6,6 @@
 		</h1>
 		<form class="form-create w-50" @submit.prevent="create">
 			<div class="form-row">
-				<div class="form-group col-md-2">
-					<label for="plate">Quantidade</label>
-					<input v-model="spot.ammount" type="number" required class="form-control" id="ammount" placeholder="-" min="1">
-				</div>
-				<div class="form-group col-md-5">
-					<label for="type">Tipo de Vaga</label>
-					<select v-model="spot.idVehicleType" required class="custom-select" id="type">
-						<option value="-1" selected disabled>Selecione um tipo</option>
-						<option value="0">Carro</option>
-						<option value="1">Moto</option>
-					</select>
-				</div>
 				<div class="form-group col-md-5">
 					<label for="type">Status</label>
 					<select v-model="spot.idStatus" required class="custom-select" id="type">

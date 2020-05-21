@@ -3,6 +3,7 @@
 		<h1 class="exit mb-0 mt-3 mr-4" @click="close">
 			X
 		</h1>
+    <h1>Meus veículos</h1>
 		<form class="form-create" @submit.prevent="create">
 			<div class="form-row">
 				<div class="form-group col-md-6">
@@ -57,7 +58,7 @@
         </template>
       </template>
     </b-table>
-		<button :disabled="!selected.length > 0" @click="trash" type="button" name="button" class="btn btn-danger _rounded">Deletar</button>
+		<!-- <button :disabled="!selected.length > 0" @click="trash" type="button" name="button" class="btn btn-danger _rounded">Deletar</button> -->
 	</div>
 </template>
 
@@ -91,8 +92,6 @@ export default {
         color: "",
         driver: {
           id: null,
-          user: null,
-          cpf: "",
         },
 			},
 		 selectMode: 'multi',
@@ -127,7 +126,7 @@ export default {
 				.catch(console.log)
 		},
 		create() {
-      this.vehicle.driver = this.user;
+      this.vehicle.driver = this.user.id;
 			axios.post('vehicles/', this.vehicle, {
           headers: { 'Authorization': 'Token '+ this.token }
         })
@@ -148,37 +147,37 @@ export default {
 				})
 				.catch(console.log)
 		},
-		trash() {
-			let trashList = [];
-			console.log("Selecteds:", this.selected)
-			for (let selected of this.selected) {
-				trashList.push(this.vehicles.find(vehicle => {
-					console.log("vehicle", vehicle);
-					console.log("selected", selected);
-					return vehicle.plate == selected.placa;
-				}))
-			}
-			// for (let id of this.ids) {
-			// 	this.vehicles.find(vehicle => {
-			// 		console.log("ID", id);
-			// 		console.log("Vehicle", vehicle);
-			// 		return vehicle.id = id;
-			// 	})
-			// }
-			console.log("Lista de Lixo:", trashList);
-			// axios.delete('/api/vehicle', this.vehicle)
-			// 	.then(response => {
-			// 		console.log(response);
-			// 		this.refresh();
-			// 		this.vehicle = {
-			// 			plate: null,
-			// 			vehicle_type: -1,
-			// 			make: null,
-			// 			model: null
-			// 		}
-			// 	})
-			// 	.catch(console.log)
-		},
+		// trash() {
+		// 	let trashList = [];
+		// 	console.log("Selecteds:", this.selected)
+		// 	for (let selected of this.selected) {
+		// 		trashList.push(this.vehicles.find(vehicle => {
+		// 			console.log("vehicle", vehicle);
+		// 			console.log("selected", selected);
+		// 			return vehicle.plate == selected.placa;
+		// 		}))
+		// 	}
+		// 	for (let id of this.ids) {
+		// 		this.vehicles.find(vehicle => {
+		// 			console.log("ID", id);
+		// 			console.log("Vehicle", vehicle);
+		// 			return vehicle.id = id;
+		// 		})
+		// 	}
+		// 	console.log("Lista de Lixo:", trashList);
+		// 	axios.delete('/api/vehicle', this.vehicle)
+		// 		.then(response => {
+		// 			console.log(response);
+		// 			this.refresh();
+		// 			this.vehicle = {
+		// 				plate: null,
+		// 				vehicle_type: -1,
+		// 				make: null,
+		// 				model: null
+		// 			}
+		// 		})
+		// 		.catch(console.log)
+		// },
 		onRowSelected(items) {
       this.selected = items
     },
