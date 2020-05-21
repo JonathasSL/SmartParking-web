@@ -153,19 +153,11 @@
 					</div>
 					<div class="form-group col-md-3">
 						<label for="price_per_hour">Preço por hora: R$</label>
-<<<<<<< HEAD
 						<input v-model.number="formRegister.parking.price_per_hour" type="number" class="form-control" placeholder="2,00">
 					</div>
 					<div class="form-group col-md-3">
 						<label for="price_per_hour">Total de vagas:</label>
 						<input v-model.number="formRegister.parking.amount_parking_spots" type="number" class="form-control" placeholder="30">
-=======
-						<input v-model.number="formRegister.parking.price_per_hour" type="number" class="form-control" id="price_per_hour" placeholder="2,00">
-					</div>
-					<div class="form-group col-md-3">
-						<label for="amount_parking_spots">Total de vagas:</label>
-						<input v-model.number="formRegister.parking.amount_parking_spots" type="number" class="form-control" id="amount_parking_spots" placeholder="30">
->>>>>>> eb5ab75eef6a6198541919b1bf0842eeb7fbdcc6
 					</div>
 				</div>				
 				<button type="submit" class="btn btn-block btn-lg" :class="registerUserType ? 'btn-info' : 'btn-dark'">Cadastrar</button>
