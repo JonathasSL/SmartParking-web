@@ -23,19 +23,28 @@
 
           <div class="modal-footer">
             <slot name="footer">
-              <button v-if="user" type="button" class="btn btn-outline-primary" @click="close">Reservar</button>
+              <button v-if="user" type="button" class="btn btn-outline-primary" @click="booking">Reservar</button>
               <button type="button" class="btn btn-primary" @click="close">Fechar</button>
             </slot>
           </div>
         </div>
       </div>
+      <booking @close="isBookingVisible = false" v-if="isBookingVisible" 
+        :token="this.token" :user="this.user" :parking="this.parking"
+        class="booking-container h-100 w-100" />
     </div>
-  </transition>
+    
+  </transition>  
 </template>
 
 <script>
+import booking from '@/components/Booking.vue';
+
   export default {
     name: 'modal',
+    components: {
+      booking,
+    },
     props: {
       parking: {
         type: Object,
@@ -43,16 +52,37 @@
       user: { 
         type: Object,
       },
-    }, 
+      token: {
+        type: String,
+      }
+    },
+    data() {
+      return {
+        isBookingVisible: false,
+      }      
+    },
     methods: {
       close(event) {
         this.$emit('close');
       },
+      async booking() {
+        this.showBooking();
+      },
+      showBooking() {
+			  this.isBookingVisible = !this.isBookingVisible;
+		  },
     },
   };
 </script>
 
 <style lang="css" scoped>
+.booking-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 99999999
+}
+
 .modal-mask {
   position: fixed;
   z-index: 9998;
