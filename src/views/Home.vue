@@ -98,13 +98,13 @@
     		
 		</main>
 		<modal v-show="isModalVisible" @close="showModal" 
-			:parking="this.selectedParking" :user="this.user" />
+			:parking="this.selectedParking" :user="this.user" :token="this.token" />
     </div>
     <Login @close="showLogin = false" @logged="logged" v-if="showLogin" class="login-container h-100 w-100"></Login>
     <VehicleList @close="showVehicleList = false" v-if="showVehicleList" :token="this.token" :user="this.user" class="vehicle-list-container h-100 w-100"></VehicleList>
     <SpotList @close="showSpotList = false" v-if="showSpotList" :token="this.token" :user="this.user" class="vehicle-list-container h-100 w-100"></SpotList>
     <Garage @close="showGarage = false" v-if="showGarage" :token="this.token" :user="this.user" class="vehicle-list-container h-100 w-100"></Garage>
-	<PriceTable @close="showPriceTable = false" v-if="showPriceTable" :token="this.token" :user="this.user" class="vehicle-list-container h-100 w-100"></PriceTable>
+	  <PriceTable @close="showPriceTable = false" v-if="showPriceTable" :token="this.token" :user="this.user" class="vehicle-list-container h-100 w-100"></PriceTable>
 	</div>
 </template>
 
