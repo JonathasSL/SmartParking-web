@@ -30,6 +30,13 @@
 								<span class="ml-2">Meu estacionamento</span>
 							</a>
 			      </li>
+            <li v-if="user && user.type != 'driver'" @click="showManageBooking = true" class="nav-item">
+							<a class="nav-link" href="#">
+								<!-- <img src="@/assets/icon/rectangles.svg" alt=""> -->
+								<!-- <users-icon size="1.5x" class="custom-class"></users-icon> -->
+								<span class="ml-2">Gerenciamento de vagas</span>
+							</a>
+			      </li>
 						<!-- <li v-if="user && user.type != 'driver'" @click="showGarage = true" class="nav-item">
 							<a class="nav-link" href="#">
 								<span class="ml-2">Garagem</span>
@@ -100,11 +107,9 @@
 		<modal v-show="isModalVisible" @close="showModal" 
 			:parking="this.selectedParking" :user="this.user" :token="this.token" />
     </div>
-    <Login @close="showLogin = false" @logged="logged" v-if="showLogin" class="login-container h-100 w-100"></Login>
-    <VehicleList @close="showVehicleList = false" v-if="showVehicleList" :token="this.token" :user="this.user" class="vehicle-list-container h-100 w-100"></VehicleList>
-    <SpotList @close="showSpotList = false" v-if="showSpotList" :token="this.token" :user="this.user" class="vehicle-list-container h-100 w-100"></SpotList>
-    <Garage @close="showGarage = false" v-if="showGarage" :token="this.token" :user="this.user" class="vehicle-list-container h-100 w-100"></Garage>
-	  <PriceTable @close="showPriceTable = false" v-if="showPriceTable" :token="this.token" :user="this.user" class="vehicle-list-container h-100 w-100"></PriceTable>
+    <Login @close="showLogin = false" @logged="logged" v-if="showLogin" class="custom-container h-100 w-100"></Login>
+    <ManageBooking @close="showManageBooking = false" v-if="showManageBooking" :token="this.token" :user="this.user" class="custom-container h-100 w-100" />
+    <SpotList @close="showSpotList = false" v-if="showSpotList" :token="this.token" :user="this.user" class="custom-container h-100 w-100" />
 	</div>
 </template>
 
@@ -119,6 +124,7 @@ import VehicleList from '@/components/VehicleList.vue';
 import SpotList from '@/components/SpotList.vue';
 import Garage from '@/components/Garage.vue';
 import PriceTable from '@/components/PriceTable.vue';
+import ManageBooking from '@/components/ManageBooking.vue';
 
 // Axios
 import axios from 'axios';
@@ -136,12 +142,14 @@ export default {
 		VehicleList,
 		SpotList,
 		Garage,
-		PriceTable,
+    PriceTable,
+    ManageBooking,  
 	},	
 	data() {
 		return {
 			showLogin: false,
-			showVehicleList: false,
+      showVehicleList: false,
+			showManageBooking: false,
 			showSpotList: false,
 			showGarage: false,
 			showPriceTable: false,
@@ -164,7 +172,7 @@ export default {
 			circle_radius: 27,
 			area_radius: 1270,
 			isModalVisible: false,
-      selectedParking: null,
+      selectedParking: {},
       isPublic: true,
 		}
 	},
@@ -188,10 +196,13 @@ export default {
 			const result = await this.getMap(this.currentPosition);
 			this.infos = result.infos;
 			this.markers = result.markers;
-		},
+    },
 		async selectParking(id) {
 			const response = await this.$http.get(`parkings/?public=${id}`);
-			this.selectedParking = response.data[0];
+      const park = response.data.filter(n => {
+        return n.id == id;
+      });
+      this.selectedParking = park.pop();
 			this.showModal();
 		},
 		showModal() {
@@ -290,7 +301,7 @@ export default {
 	cursor: pointer;
 }
 
-.login-container, .vehicle-list-container {
+.custom-container {
   position: absolute;
   top: 0;
   left: 0;

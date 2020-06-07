@@ -98,12 +98,12 @@
         this.$emit('close');
       },
       confirmBooking() {
-        this.reservation.totalTime = this.totalTime;
+        this.reservation.total_time = this.totalTime;
         axios.post(`bookings/`, this.reservation, {
           headers: { 'Authorization': 'Token '+ this.token }
-        }).then(response => {
-          alert("Reserva realizada com sucesso!");
-        }).catch(error => {
+        }).then(
+          alert("Reserva realizada com sucesso!")
+        ).catch(error => {
           alert("Não foi possível realizar sua reserva no momento.")
         });
       },      
