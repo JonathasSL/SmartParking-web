@@ -23,7 +23,7 @@
 
           <div class="modal-footer">
             <slot name="footer">
-              <button v-if="user" type="button" class="btn btn-outline-primary" @click="booking">Reservar</button>
+              <button v-if="user && user.type == 'driver'" type="button" class="btn btn-outline-primary" @click="booking">Reservar</button>
               <button type="button" class="btn btn-primary" @click="close">Fechar</button>
             </slot>
           </div>

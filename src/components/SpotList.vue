@@ -1,17 +1,17 @@
 <template lang="html">
-	<div class="spot-list h-100 w-100 d-flex flex-column justify-content-center align-items-center">
+	<div class="spot-list vh-100 vw-100 d-flex flex-column justify-content-center align-items-center">
 		<h1 class="text-black mb-4"><b>Meu estacionamento</b></h1>
 		<h1 class="exit mb-0 mt-3 mr-4" @click="close">
 			X
 		</h1>
     <div class="garage-info">
-      <p>Total de vagas: {{ parking.amount_parking_spots }}</p>    
-      <p>Vagas disponíveis: {{ parking.available_parking_spots }}</p>
-      <p>Preço por hora: {{ parking.price_per_hour }}</p>
+      <span>Total de vagas: {{ parking.amount_parking_spots }}</span><br> 
+      <span>Vagas disponíveis: {{ parking.available_parking_spots }}</span><br>
+      <span>Preço por hora: {{ parking.price_per_hour }}</span><br>
     </div>
     <hr>
 		<form class="form-create w-50" @submit.prevent="update">
-      <h3>Atualizar informações</h3>
+      <h5>Atualizar informações</h5>
 			<div class="form-row add-spots">      
 				<div class="form-group col-md-6">          
 					<label for="amount">Quantidade total</label>          
@@ -22,30 +22,22 @@
 					<input v-model="parking.price_per_hour" type="number" class="form-control" id="price" min="1">
 				</div>       	             
 			</div>	
-      <button type="submit" class="btn btn-info btn-block btn-lg">Atualizar</button>
+      <button type="submit" class="btn btn-info btn-block center">Atualizar</button>
 		</form>
     <div>
-    <b-table
-      ref="selectableTable"
-      selectable
-      sticky-header
-      :select-mode="selectMode"
-      selected-variant="success"
-      :items="spotsTable"
-      @row-selected="onRowSelected"
-      responsive="sm"
-			class="table-size"
-    >
-      <template v-slot:cell(selected)="{ rowSelected }">
-        <template v-if="rowSelected">
-          <span aria-hidden="true">&check;</span>
-          <span class="sr-only">Selected</span>
-        </template>
-        <template v-else>
-          <span aria-hidden="true">&nbsp;</span>
-          <span class="sr-only">Not selected</span>
-        </template>
-      </template>
+      <b-table ref="selectableTable" selectable sticky-header :select-mode="selectMode"
+        selected-variant="success" :items="spotsTable" @row-selected="onRowSelected"
+        responsive="sm" class="table-size" >
+        <template v-slot:cell(selected)="{ rowSelected }">
+          <template v-if="rowSelected">
+            <span aria-hidden="true">&check;</span>
+            <span class="sr-only">Selected</span>
+          </template>
+          <template v-else>
+            <span aria-hidden="true">&nbsp;</span>
+            <span class="sr-only">Not selected</span>
+          </template>               
+        </template> 
       </b-table>
     </div>
   </div>
@@ -95,6 +87,7 @@ export default {
       let table = [];
 			for (let spot of this.spots) {
 				table.push({
+          Vaga: spot.id,
 					Status: spot.status_title,
 					Ocupante:  spot.driver_name ? spot.driver_name : "---",
 				});
@@ -137,57 +130,10 @@ export default {
       this.$emit('updated', updated_user);
       this.refresh();
     },
-    
-		trash() {
-			let trashList = [];
-
-			console.log("Selecteds:", this.selected)
-
-			for (let selected of this.selected) {
-				trashList.push(this.spots.find(spot => {
-					return spot.id == selected.ID;
-				}))
-			}
-
-			for (let trash of trashList) {
-				axios.delete(`parking-spots/${trash.id}`,  {
-          headers: { 'Authorization': 'Token '+ token }
-        })
-        .then(response => {
-          console.log("Delete:", response);
-          this.refresh();
-        })
-        .catch(console.log)
-			}
-
-
-
-			// for (let id of this.ids) {
-			// 	this.vehicles.find(vehicle => {
-			// 		console.log("ID", id);
-			// 		console.log("Vehicle", vehicle);
-			// 		return vehicle.id = id;
-			// 	})
-			// }
-
-			console.log("Lista de Lixo:", trashList);
-
-			// axios.delete('/api/vehicle', this.vehicle)
-			// 	.then(response => {
-			// 		console.log(response);
-			// 		this.refresh();
-			// 		this.vehicle = {
-			// 			plate: null,
-			// 			vehicle_type: -1,
-			// 			make: null,
-			// 			model: null
-			// 		}
-			// 	})
-			// 	.catch(console.log)
-		},
-
-		onRowSelected(items) {
-      this.selected = items
+    onRowSelected(items) {
+      this.selected = items.map(item =>
+        this.spots.find(spot => item.Vaga == spot.id)
+      );
     },
 	},	
 }
