@@ -195,7 +195,7 @@ export default {
 		close() {
 			this.$emit('close');
 		},		
-		async login () {
+		async login() {
 			let user;
 			if (this.loginType == true) {
 				await axios.post('login/driver/', this.formLogin)
@@ -240,7 +240,7 @@ export default {
 					.then(response => {
 						user = response.data;
 						user.type = "driver";
-						alert(constants.MSGS.REGISTER_SUCCESSFULL);
+            alert(constants.MSGS.REGISTER_SUCCESSFULL);
 					})
 					.catch(err => {alert(constants.MSGS.REGISTER_FAIL)});
 			} else {
@@ -256,14 +256,9 @@ export default {
 						alert(constants.MSGS.REGISTER_SUCCESSFULL);
 					})
 					.catch(err => {alert(constants.MSGS.REGISTER_FAIL)});
-			}
-			if (user) {
-				this.$emit('logged', user, this.token);
-				this.$emit('close');
-				this.$destroy();
-			}
+      }
+      this.isLogin = true;
 		},
-
 		formatAddress() {
 			return `${this.formRegister.parking.place} ${this.formRegister.parking.place_number} ${this.formRegister.parking.city} ${this.formRegister.parking.state} ${this.formRegister.parking.country}`
 		}
