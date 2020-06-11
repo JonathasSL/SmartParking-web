@@ -76,6 +76,9 @@ import Request from 'axios-request-handler';
 			  this.isBookingVisible = !this.isBookingVisible;
       },
       startPoll() {
+        if (this.parking.id == undefined) {
+          return;
+        }
         const url = `https://tisv-smartparking.herokuapp.com/parkings/?public=${this.parking.id}`;
         const parkingPoll = new Request(url);
         parkingPoll.poll(5000).get((response) => {

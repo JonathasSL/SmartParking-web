@@ -14,8 +14,8 @@
 					<label for="type">Tipo de Veículo</label>
 					<select v-model="vehicle.type" required class="custom-select" id="type">
 						<option value="-1" selected disabled>Selecione um tipo</option>
-						<option value="0">Carro</option>
-						<option value="1">Moto</option>
+						<option value="Carro">Carro</option>
+						<option value="Moto">Moto</option>
 					</select>
 				</div>
 			</div>

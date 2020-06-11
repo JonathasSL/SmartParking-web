@@ -245,7 +245,6 @@ export default {
 					.catch(err => {alert(constants.MSGS.REGISTER_FAIL)});
 			} else {
 				let fullAddress = this.formatAddress();
-				console.log(fullAddress);
 				const response =  await openStreetService.search(fullAddress);
 				this.formRegister.parking.latitude = response.data[0].lat;
 				this.formRegister.parking.longitude = response.data[0].lon;

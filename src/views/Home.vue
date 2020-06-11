@@ -253,7 +253,6 @@ export default {
 			this.changeRadius(event);
 		},
 		getMarkerColor(spots) {
-			console.log(spots);
 			switch (true) {
 				case spots <= 5:					
 					return this.markerColor.red;
