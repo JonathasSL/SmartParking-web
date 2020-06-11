@@ -77,7 +77,6 @@
         totalValue: 0,
         totalTime: 0,
         reservation: {
-          total_time: null,
           book_to: null,
           parking: null,
           driver: null,
@@ -98,13 +97,14 @@
         this.$emit('close');
       },
       confirmBooking() {
-        this.reservation.total_time = this.totalTime;
+        this.reservation.book_to = this.reservation.book_to.replace("T", " ");
         axios.post(`bookings/`, this.reservation, {
           headers: { 'Authorization': 'Token '+ this.token }
-        }).then(
-          alert("Reserva realizada com sucesso!")
-        ).catch(error => {
-          alert("Não foi possível realizar sua reserva no momento.")
+        }).then((response) => {
+          alert("Reserva realizada com sucesso!");
+          this.$emit('close');
+        }).catch(error => {
+          alert(`${error.response.data['401 - Não Autorizado']}`)
         });
       },      
     },

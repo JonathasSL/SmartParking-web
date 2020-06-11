@@ -93,20 +93,13 @@
 					:options="{fillColor:'white',fillOpacity:1, strokeWeight:0.5}"					
 					></GmapCircle>
 				</GmapMap>
-				<!-- :radius="2"
-					:options="{fillColor:'white',fillOpacity:1, strokeWeight:0.5}" -->
-				<!-- <GmapInfoWindow
-					:key="index"
-					v-for="(i, index) in infos"
-					:position="i.position"
-					:content="i.content"
-				/> -->
 
     		
 		</main>
 		<modal v-show="isModalVisible" @close="showModal" 
 			:parking="this.selectedParking" :user="this.user" :token="this.token" />
     </div>
+    <VehicleList @close="showVehicleList = false" v-if="showVehicleList" :token="this.token" :user="this.user" class="custom-container h-100 w-100"></VehicleList>
     <Login @close="showLogin = false" @logged="logged" v-if="showLogin" class="custom-container h-100 w-100"></Login>
     <ManageBooking @close="showManageBooking = false" v-if="showManageBooking" :token="this.token" :user="this.user" class="custom-container h-100 w-100" />
     <SpotList @close="showSpotList = false" v-if="showSpotList" :token="this.token" :user="this.user" class="custom-container h-100 w-100" />
