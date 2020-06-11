@@ -121,6 +121,7 @@ import ManageBooking from '@/components/ManageBooking.vue';
 
 // Axios
 import axios from 'axios';
+import Request from 'axios-request-handler';
 // BUGFIX: same Vue CLI Service URL for CORS with Cue CLI proxy (look at "vue.config.js" file)
 // axios.defaults.baseURL = 'http://localhost:4242';
 
@@ -196,6 +197,7 @@ export default {
         return n.id == id;
       });
       this.selectedParking = park.pop();
+      this.startPoll(id);
 			this.showModal();
 		},
 		showModal() {
@@ -272,7 +274,25 @@ export default {
 			const area = max * 60;
 			this.circle_radius =  max / Math.pow(2.0, zoom);
 			this.area_radius = area / Math.pow(2.0, zoom);
-		}
+    },
+    startPoll(id) {
+      if (id == undefined) {
+        console.log("teste");
+      }
+      const url = `https://tisv-smartparking.herokuapp.com/parkings/?public=${id}`;
+      var parkingPoll = new Request(url, {
+          lockable: false, // if true if you try to make a request when there is a pending one, the second will not be executed
+          cancelable: true, // if true if you try to make a request when there is a pending one, the first will be canceled and the new will executed
+          errorHandler:(error,method) => { console.log(error) } // function for handling the errors
+      });
+      parkingPoll.poll(5000).get((response) => {
+        const park = response.data.filter(n => {
+          return n.id == this.selectedParking.id;
+        });
+        this.selectedParking = park.pop();
+        console.log(this.selectedParking)
+      });
+    },
 	}
 };
 </script>
