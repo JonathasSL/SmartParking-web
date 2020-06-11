@@ -39,6 +39,7 @@
 
 <script>
 import booking from '@/components/Booking.vue';
+import Request from 'axios-request-handler';
 
   export default {
     name: 'modal',
@@ -61,6 +62,9 @@ import booking from '@/components/Booking.vue';
         isBookingVisible: false,
       }      
     },
+    mounted() {
+      this.startPoll();      
+    },
     methods: {
       close(event) {
         this.$emit('close');
@@ -70,8 +74,20 @@ import booking from '@/components/Booking.vue';
       },
       showBooking() {
 			  this.isBookingVisible = !this.isBookingVisible;
-		  },
+      },
+      startPoll() {
+        const url = `https://tisv-smartparking.herokuapp.com/parkings/?public=${this.parking.id}`;
+        const parkingPoll = new Request(url);
+        parkingPoll.poll(5000).get((response) => {
+          const park = response.data.filter(n => {
+            return n.id == this.parking.id;
+          });
+          this.parking = park.pop();
+          console.log(this.parking)
+        });
+      },
     },
+    
   };
 </script>
 

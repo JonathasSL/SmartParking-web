@@ -1,7 +1,7 @@
 <template lang="html">
 	<div class="d-flex align-items-center">
 		<img :src="imgSrc" class="logo" alt="">
-		<h3 v-if="name" class="name mb-0" :style="{color: textColor}">Guardian</h3>
+		<h3 v-if="name" class="name mb-0" :style="{color: textColor}">Smart Parking</h3>
 	</div>
 </template>
 
